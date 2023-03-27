@@ -249,8 +249,32 @@ class Sort(object):
         if(trk.time_since_update > self.max_age):
           self.trackers.pop(i)
     if(len(ret)>0):
-      return np.concatenate(ret)
+      ret = np.concatenate(ret)
+      flip_ret = self._organize_output_data(dets, ret)
+      return flip_ret
     return np.empty((0,5))
+  
+  
+  def _organize_output_data(self, dets, ret):
+    
+    flip_ret = np.flip(ret, axis=0).tolist()
+
+    for i in flip_ret:
+      first = True
+      detection = []
+      for j in dets:
+        delta_sum = (i[0] - j[0]) ** 2 + (i[1] - j[1]) ** 2 + (i[2] - j[2]) ** 2 + (i[3] - j[3]) ** 2
+        if first:
+          first = False
+          delta_count = delta_sum
+          detection = j
+        if delta_sum < delta_count:
+          delta_count = delta_sum
+          detection = j
+      i.append(detection[-1])
+    
+    return flip_ret
+
 
 def parse_args():
     """Parse input arguments."""
