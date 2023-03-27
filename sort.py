@@ -256,23 +256,20 @@ class Sort(object):
   
   
   def _organize_output_data(self, dets, ret):
-    
-    flip_ret = np.flip(ret, axis=0).tolist()
+    flip_ret = np.flip(ret, axis=0)
 
-    for i in flip_ret:
-      first = True
-      detection = []
-      for j in dets:
-        delta_sum = (i[0] - j[0]) ** 2 + (i[1] - j[1]) ** 2 + (i[2] - j[2]) ** 2 + (i[3] - j[3]) ** 2
-        if first:
-          first = False
-          delta_count = delta_sum
-          detection = j
-        if delta_sum < delta_count:
-          delta_count = delta_sum
-          detection = j
-      i.append(detection[-1])
-    
+    ret_boxes = flip_ret[:, :4]
+    det_boxes = dets[:, :4]
+    # add axis to det_boxes to have difference of each ret to all dets
+    differences = ret_boxes - det_boxes[:, np.newaxis]
+    deltas = np.sum((differences)**2, axis=-1)
+    # closest in each ret
+    matches = np.argmin(deltas, axis=0)
+    # corresponding scores
+    scores = dets[:, -1][matches]
+    # add det score to each ret
+    flip_ret = np.append(flip_ret, scores[:, np.newaxis], -1)
+
     return flip_ret
 
 
