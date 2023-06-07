@@ -6,7 +6,6 @@ setup(name='sort',
       version='1.0',
       description='Retail Intelligence sort',
       author='nautec',
-      # packages=find_packages(),
       url='https://github.com/retail-intelligence/sort',
       py_modules=["sort"],
     )
